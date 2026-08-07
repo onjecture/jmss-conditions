@@ -1,0 +1,2 @@
+# jmss-conditions
+api weather
