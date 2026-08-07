@@ -1,0 +1,245 @@
+const latitude = -37.9125;
+const longitude = 145.1340;
+
+const weatherURL = 
+    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,wind_direction_10m,cloud_cover,visibility,precipitation_probability,uv_index,dew_point_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Australia%2FMelbourne`;
+
+
+const weatherDescriptions = {
+    0: "Clear sky",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Fog",
+    48: "Depositing rime fog",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    61: "Light rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    71: "Light snowfall",
+    73: "Moderate snowfall",
+    75: "Heavy snowfall",
+    80: "Rain showers",
+    81: "Moderate showers",
+    82: "Heavy showers",
+    95: "Thunderstorm",
+    96: "Thunderstorm with hail",
+    99: "Thunderstorm with heavy hail"
+};
+
+
+function updateText(id, value) {
+    document.getElementById(id).textContent = value;
+}
+
+
+function formatDate(date) {
+    return date.toLocaleDateString("en-AU", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+}
+
+
+function formatTime(date) {
+    return date.toLocaleTimeString("en-AU", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+
+function windDirection(degrees) {
+
+    const directions = [
+        "N",
+        "NE",
+        "E",
+        "SE",
+        "S",
+        "SW",
+        "W",
+        "NW"
+    ];
+
+    const index = Math.round(degrees / 45) % 8;
+
+    return `${degrees}° (${directions[index]})`;
+}
+
+
+function loadCurrentWeather(data) {
+
+    const current = data.current;
+
+    updateText(
+        "weatherDescription",
+        weatherDescriptions[current.weather_code] || "Unknown"
+    );
+
+    updateText(
+        "temperature",
+        `${current.temperature_2m} °C`
+    );
+
+    updateText(
+        "apparentTemperature",
+        `${current.apparent_temperature} °C`
+    );
+
+    updateText(
+        "dewPoint",
+        `${current.dew_point_2m} °C`
+    );
+
+    updateText(
+        "humidity",
+        `${current.relative_humidity_2m} %`
+    );
+
+    updateText(
+        "pressure",
+        `${current.pressure_msl} hPa`
+    );
+
+    updateText(
+        "windSpeed",
+        `${current.wind_speed_10m} km/h`
+    );
+
+    updateText(
+        "windDirection",
+        windDirection(current.wind_direction_10m)
+    );
+
+    updateText(
+        "cloudCover",
+        `${current.cloud_cover} %`
+    );
+
+    updateText(
+        "visibility",
+        `${(current.visibility / 1000).toFixed(1)} km`
+    );
+
+    updateText(
+        "rainProbability",
+        `${current.precipitation_probability} %`
+    );
+
+    updateText(
+        "uvIndex",
+        current.uv_index
+    );
+
+
+    const updateTime = new Date(current.time);
+
+    updateText(
+        "lastUpdated",
+        formatTime(updateTime)
+    );
+}
+
+
+function loadForecast(data) {
+
+    const table = document.getElementById("forecastTable");
+
+    table.innerHTML = "";
+
+    for (let i = 0; i < data.daily.time.length; i++) {
+
+        const row = document.createElement("tr");
+
+        const date = new Date(data.daily.time[i]);
+
+        row.innerHTML = `
+            <td>${date.toLocaleDateString("en-AU", {
+                weekday: "short",
+                day: "numeric",
+                month: "short"
+            })}</td>
+
+            <td>
+                ${weatherDescriptions[data.daily.weather_code[i]] || "Unknown"}
+            </td>
+
+            <td>
+                ${data.daily.temperature_2m_min[i]} °C
+            </td>
+
+            <td>
+                ${data.daily.temperature_2m_max[i]} °C
+            </td>
+
+            <td>
+                ${data.daily.precipitation_probability_max[i]} %
+            </td>
+        `;
+
+        table.appendChild(row);
+    }
+}
+
+
+async function fetchWeather() {
+
+    try {
+
+        const response = await fetch(weatherURL);
+
+        if (!response.ok) {
+            throw new Error("Weather service unavailable");
+        }
+
+        const data = await response.json();
+
+        loadCurrentWeather(data);
+
+        loadForecast(data);
+
+        updateText(
+            "connectionStatus",
+            "Connected"
+        );
+
+    }
+
+    catch (error) {
+
+        updateText(
+            "connectionStatus",
+            "Connection error"
+        );
+
+        console.log(error);
+
+    }
+}
+
+
+function initialisePage() {
+
+    updateText(
+        "coordinates",
+        `${latitude}, ${longitude}`
+    );
+
+    updateText(
+        "currentDate",
+        formatDate(new Date())
+    );
+
+    fetchWeather();
+
+}
+
+
+initialisePage();
+
+setInterval(fetchWeather, 600000);
