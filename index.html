@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ObserveJMSS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="page">
+
+    <header>
+
+        <div class="title-row">
+
+            <div>
+
+                <h1>OBSERVE JMSS</h1>
+
+                <p class="subtitle">
+                    JOHN MONASH SCIENCE SCHOOL
+                </p>
+
+                <p class="status-text">
+                    DATA LINK ACTIVE
+                </p>
+
+            </div>
+
+            <div class="live-indicator">
+
+                <span class="dot"></span>
+                LIVE
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <nav>
+
+        <a class="active" href="index.html">
+            WEATHER
+        </a>
+
+        <a href="astronomy.html">
+            ASTRONOMY
+        </a>
+
+    </nav>
+
+    <main>
+
+        <section>
+
+            <h2>LOCATION</h2>
+
+            <div class="section-grid">
+
+                <div class="row">
+                    <span>School</span>
+                    <span>John Monash Science School</span>
+                </div>
+
+                <div class="row">
+                    <span>Location</span>
+                    <span>Clayton, Victoria</span>
+                </div>
+
+                <div class="row">
+                    <span>Coordinates</span>
+                    <span id="coordinates">Loading...</span>
+                </div>
+
+                <div class="row">
+                    <span>Date</span>
+                    <span id="currentDate">Loading...</span>
+                </div>
+
+                <div class="row">
+                    <span>Last Updated</span>
+                    <span id="lastUpdated">Loading...</span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section>
+
+            <h2>ENVIRONMENT</h2>
+
+            <div class="section-grid">
+
+                <div class="row">
+                    <span>Weather</span>
+                    <span id="weatherDescription">Loading...</span>
+                </div>
+
+                <div class="row">
+                    <span>Temperature</span>
+                    <span id="temperature">-- °C</span>
+                </div>
+
+                <div class="row">
+                    <span>Feels Like</span>
+                    <span id="apparentTemperature">-- °C</span>
+                </div>
+
+                <div class="row">
+                    <span>Dew Point</span>
+                    <span id="dewPoint">-- °C</span>
+                </div>
+
+                <div class="row">
+                    <span>Humidity</span>
+                    <span id="humidity">-- %</span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section>
+
+            <h2>ATMOSPHERIC CONDITIONS</h2>
+
+            <div class="section-grid">
+
+                <div class="row">
+                    <span>Pressure</span>
+                    <span id="pressure">-- hPa</span>
+                </div>
+
+                <div class="row">
+                    <span>Wind Speed</span>
+                    <span id="windSpeed">-- km/h</span>
+                </div>
+
+                <div class="row">
+                    <span>Wind Direction</span>
+                    <span id="windDirection">--°</span>
+                </div>
+
+                <div class="row">
+                    <span>Cloud Cover</span>
+                    <span id="cloudCover">-- %</span>
+                </div>
+
+                <div class="row">
+                    <span>Visibility</span>
+                    <span id="visibility">-- km</span>
+                </div>
+
+                <div class="row">
+                    <span>Rain Probability</span>
+                    <span id="rainProbability">-- %</span>
+                </div>
+
+                <div class="row">
+                    <span>UV Index</span>
+                    <span id="uvIndex">--</span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section>
+
+            <h2>7 DAY FORECAST</h2>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Day</th>
+                        <th>Condition</th>
+                        <th>Min</th>
+                        <th>Max</th>
+                        <th>Rain</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="forecastTable">
+
+                    <tr>
+                        <td colspan="5">
+                            Retrieving forecast...
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+        <section>
+
+            <h2>SYSTEM STATUS</h2>
+
+            <div class="section-grid">
+
+                <div class="row">
+                    <span>Data Source</span>
+                    <span>Open-Meteo Forecast API</span>
+                </div>
+
+                <div class="row">
+                    <span>Refresh Interval</span>
+                    <span>Every 10 minutes</span>
+                </div>
+
+                <div class="row">
+                    <span>Station</span>
+                    <span>John Monash Science School</span>
+                </div>
+
+                <div class="row">
+                    <span>Connection</span>
+                    <span id="connectionStatus">
+                        Waiting for data...
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+
+        ObserveJMSS · Weather Dashboard · Built using Open-Meteo
+
+    </footer>
+
+</div>
+
+<script src="weather.js"></script>
+
+</body>
+</html>
