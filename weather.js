@@ -3,7 +3,7 @@ const lon = 145.1347;
 
 
 const api =
-`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation,weather_code,visibility,dew_point_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Australia/Melbourne`;
+`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation,weather_code,visibility,dew_point_2m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Australia/Melbourne`;
 
 
 const weatherText = {
@@ -120,6 +120,11 @@ document.getElementById("rainProbability").textContent =
 
 
 
+document.getElementById("uvIndex").textContent =
+`${current.uv_index}`;
+
+
+
 document.getElementById("lastUpdated").textContent =
 new Date().toLocaleTimeString("en-AU");
 
@@ -191,6 +196,7 @@ row.innerHTML = `
 <td>${daily.precipitation_probability_max[i]}%</td>
 
 `;
+
 
 
 table.appendChild(row);
