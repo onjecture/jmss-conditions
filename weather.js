@@ -1,193 +1,159 @@
-const LAT = -37.9125;
-const LON = 145.1347;
+const lat = -37.9125;
+const lon = 145.1347;
 
-const API_URL = 
-`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&timezone=Australia/Melbourne`;
 
-const weatherCodes = {
-    0: "Clear sky",
-    1: "Mainly clear",
-    2: "Partly cloudy",
-    3: "Overcast",
-    45: "Fog",
-    48: "Fog",
-    51: "Light drizzle",
-    53: "Drizzle",
-    55: "Heavy drizzle",
-    61: "Light rain",
-    63: "Rain",
-    65: "Heavy rain",
-    71: "Snow",
-    80: "Rain showers",
-    81: "Heavy showers",
-    82: "Violent showers",
-    95: "Thunderstorm"
+const api =
+`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation,weather_code,visibility&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Australia/Melbourne`;
+
+
+const weatherText = {
+    0:"Clear Sky",
+    1:"Mainly Clear",
+    2:"Partly Cloudy",
+    3:"Overcast",
+    45:"Fog",
+    51:"Light Drizzle",
+    53:"Drizzle",
+    61:"Rain",
+    63:"Rain",
+    65:"Heavy Rain",
+    80:"Rain Showers",
+    81:"Heavy Showers",
+    95:"Thunderstorm"
 };
 
 
-async function loadWeather() {
 
-    try {
+async function updateWeather(){
 
-        const response = await fetch(API_URL);
-        const data = await response.json();
+try{
 
-        const weather = data.current;
+const response = await fetch(api);
+const data = await response.json();
 
-
-        const temperature = weather.temperature_2m;
-        const humidity = weather.relative_humidity_2m;
-        const wind = weather.wind_speed_10m;
-        const rain = weather.precipitation;
-        const code = weather.weather_code;
+const current = data.current;
 
 
-        updateText("temperature", `${temperature}°C`);
-        updateText("humidity", `${humidity}%`);
-        updateText("wind", `${wind} km/h`);
-        updateText("rain", `${rain} mm`);
-        updateText(
-            "condition",
-            weatherCodes[code] || "Unknown"
-        );
+document.getElementById("weather").textContent =
+weatherText[current.weather_code] || "Unknown";
 
 
-        updateTemperatureColour(temperature);
-
-        updateRainMode(rain);
-
-        updateLiveStatus();
+document.getElementById("temperature").textContent =
+`${current.temperature_2m}°C`;
 
 
-        const now = new Date();
-
-        updateText(
-            "updated",
-            `Updated ${now.toLocaleTimeString("en-AU")}`
-        );
+document.getElementById("feels-like").textContent =
+`${current.apparent_temperature}°C`;
 
 
-        checkNightMode();
+document.getElementById("humidity").textContent =
+`${current.relative_humidity_2m}%`;
 
 
-    } catch(error) {
+document.getElementById("pressure").textContent =
+`${current.pressure_msl} hPa`;
 
-        console.error("Weather data error:", error);
 
-        updateText(
-            "status",
-            "Data unavailable"
-        );
+document.getElementById("wind-speed").textContent =
+`${current.wind_speed_10m} km/h`;
 
-    }
+
+document.getElementById("wind-direction").textContent =
+`${current.wind_direction_10m}°`;
+
+
+document.getElementById("cloud-cover").textContent =
+`${current.cloud_cover}%`;
+
+
+document.getElementById("visibility").textContent =
+`${(current.visibility / 1000).toFixed(1)} km`;
+
+
+document.getElementById("rain").textContent =
+`${current.precipitation} mm`;
+
+
+document.getElementById("connection").textContent =
+"Connected";
+
+
+document.getElementById("last-updated").textContent =
+new Date().toLocaleTimeString("en-AU");
+
+
+
+loadForecast(data.daily);
+
+
+
+}
+catch(error){
+
+console.error(error);
+
+document.getElementById("connection").textContent =
+"Connection Failed";
+
+}
 
 }
 
 
 
-function updateText(id, value) {
 
-    const element = document.getElementById(id);
+function loadForecast(daily){
 
-    if(element) {
-        element.textContent = value;
-    }
+const table =
+document.getElementById("forecast");
+
+
+if(!table) return;
+
+
+table.innerHTML="";
+
+
+for(let i=0;i<7;i++){
+
+let row=document.createElement("tr");
+
+
+row.innerHTML=`
+
+<td>${daily.time[i]}</td>
+
+<td>
+${weatherText[daily.weather_code[i]] || "Unknown"}
+</td>
+
+<td>
+${daily.temperature_2m_min[i]}°C
+</td>
+
+<td>
+${daily.temperature_2m_max[i]}°C
+</td>
+
+<td>
+${daily.precipitation_probability_max[i]}%
+</td>
+
+`;
+
+
+table.appendChild(row);
+
+}
 
 }
 
 
 
-function updateTemperatureColour(temp) {
-
-    const indicator =
-        document.getElementById("temperature-indicator");
-
-    if(!indicator) return;
-
-
-    let percentage =
-        Math.min(Math.max((temp + 5) / 45, 0), 1);
-
-
-    const blue = 255 - (percentage * 255);
-    const red = percentage * 255;
-
-
-    indicator.style.background =
-    `rgb(${red}, 80, ${blue})`;
-
-}
-
-
-
-function updateRainMode(rain) {
-
-    document.body.classList.remove(
-        "rain-mode"
-    );
-
-
-    if(rain > 0) {
-
-        document.body.classList.add(
-            "rain-mode"
-        );
-
-    }
-
-}
-
-
-
-function updateLiveStatus() {
-
-    const status =
-        document.getElementById("status");
-
-
-    if(status) {
-
-        status.textContent =
-        "LIVE DATA";
-
-        status.classList.add(
-            "online"
-        );
-
-    }
-
-}
-
-
-
-function checkNightMode() {
-
-    const hour =
-    new Date().getHours();
-
-
-    if(hour >= 18 || hour < 7) {
-
-        document.body.classList.add(
-            "night-mode"
-        );
-
-    } else {
-
-        document.body.classList.remove(
-            "night-mode"
-        );
-
-    }
-
-}
-
-
-
-loadWeather();
+updateWeather();
 
 
 setInterval(
-    loadWeather,
-    10 * 60 * 1000
+updateWeather,
+600000
 );
