@@ -3,7 +3,7 @@ const lat = -37.9125;
 const lon = 145.1347;
 
 const api =
-`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation,weather_code,visibility,dew_point_2m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Australia/Melbourne`;
+`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation,weather_code&hourly=dew_point_2m,visibility,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Australia/Melbourne`;
 
 const weatherText = {
 0:"Clear Sky",
@@ -11,14 +11,29 @@ const weatherText = {
 2:"Partly Cloudy",
 3:"Overcast",
 45:"Fog",
+48:"Depositing Rime Fog",
 51:"Light Drizzle",
 53:"Drizzle",
+55:"Heavy Drizzle",
+56:"Freezing Drizzle",
+57:"Heavy Freezing Drizzle",
 61:"Rain",
 63:"Rain",
 65:"Heavy Rain",
+66:"Freezing Rain",
+67:"Heavy Freezing Rain",
+71:"Light Snow",
+73:"Snow",
+75:"Heavy Snow",
+77:"Snow Grains",
 80:"Rain Showers",
 81:"Heavy Showers",
-95:"Thunderstorm"
+82:"Violent Rain Showers",
+85:"Snow Showers",
+86:"Heavy Snow Showers",
+95:"Thunderstorm",
+96:"Thunderstorm with Hail",
+99:"Thunderstorm with Heavy Hail"
 };
 
 let lastUpdateTime = null;
@@ -31,13 +46,21 @@ const response = await fetch(api);
 
 if(!response.ok){
 
-throw new Error("API failed");
+throw new Error(`API failed: ${response.status}`);
 
 }
 
 const data = await response.json();
 
 const current = data.current;
+
+let hourlyIndex = data.hourly.time.indexOf(current.time);
+
+if(hourlyIndex === -1){
+
+hourlyIndex = 0;
+
+}
 
 document.getElementById("coordinates").textContent =
 `${lat}, ${lon}`;
@@ -61,7 +84,7 @@ document.getElementById("apparentTemperature").textContent =
 `${current.apparent_temperature} °C`;
 
 document.getElementById("dewPoint").textContent =
-`${current.dew_point_2m} °C`;
+`${data.hourly.dew_point_2m[hourlyIndex]} °C`;
 
 document.getElementById("humidity").textContent =
 `${current.relative_humidity_2m}%`;
@@ -79,13 +102,13 @@ document.getElementById("cloudCover").textContent =
 `${current.cloud_cover}%`;
 
 document.getElementById("visibility").textContent =
-`${(current.visibility / 1000).toFixed(1)} km`;
+`${(data.hourly.visibility[hourlyIndex] / 1000).toFixed(1)} km`;
 
 document.getElementById("rainProbability").textContent =
 `${data.daily.precipitation_probability_max[0]}%`;
 
 document.getElementById("uvIndex").textContent =
-`${current.uv_index}`;
+`${data.hourly.uv_index[hourlyIndex]}`;
 
 lastUpdateTime = Date.now();
 
@@ -103,7 +126,7 @@ loadForecast(data.daily);
 
 catch(error){
 
-console.error(error);
+console.error("Weather API error:", error);
 
 document.getElementById("connectionStatus").textContent =
 "Connection Failed";
